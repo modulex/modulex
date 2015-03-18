@@ -1,7 +1,7 @@
 /*
-Copyright 2015, modulex@1.7.7
+Copyright 2015, modulex@1.7.10
 MIT Licensed
-build time: Mon, 19 Jan 2015 11:57:11 GMT
+build time: Wed, 18 Mar 2015 04:51:15 GMT
 */
 /**
  * A module registration and load library.
@@ -35,21 +35,25 @@ var modulex = (function (undefined) {
     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profiles,profileEnd,' +
     'show,table,time,timeEnd,timeline,timelineEnd,timeStamp,trace,warn').split(',');
     while ((prop = properties.pop())) {
-      con[prop] = con[prop] || empty;
+      if (!(prop in con)) {
+        con[prop] = empty;
+      }
     }
     while ((method = methods.pop())) {
-      con[method] = con[method] || dummy;
+      if (!(method in con)) {
+        con[method] = dummy;
+      }
     }
   })(this.console = this.console || {}); // Using `this` for web workers.
 
   var mx = {
     /**
      * The build time of the library.
-     * NOTICE: 'Mon, 19 Jan 2015 11:57:12 GMT' will replace with current timestamp when compressing.
+     * NOTICE: 'Wed, 18 Mar 2015 04:51:15 GMT' will replace with current timestamp when compressing.
      * @private
      * @type {String}
      */
-    __BUILD_TIME: 'Mon, 19 Jan 2015 11:57:12 GMT',
+    __BUILD_TIME: 'Wed, 18 Mar 2015 04:51:15 GMT',
 
     /**
      * modulex Environment.
@@ -77,10 +81,10 @@ var modulex = (function (undefined) {
 
     /**
      * The version of the library.
-     * NOTICE: '1.7.7' will replace with current version when compressing.
+     * NOTICE: '1.7.10' will replace with current version when compressing.
      * @type {String}
      */
-    version: '1.7.7',
+    version: '1.7.10',
 
     /**
      * set modulex configuration
@@ -302,7 +306,6 @@ var modulex = (function (undefined) {
   var m, v;
   var ua = (host.navigator || {}).userAgent || '';
 
-  // https://github.com/kissyteam/kissy/issues/545
   // AppleWebKit/535.19
   // AppleWebKit534.30
   // appleWebKit/534.30
@@ -1398,7 +1401,6 @@ var modulex = (function (undefined) {
     var forceCssPoll = mx.Config.forceCssPoll ||
       (webkit && webkit < 536) ||
         // unknown browser defaults to css poll
-        // https://github.com/kissyteam/modulex/issues/607
       (!webkit && !Utils.trident && !Utils.gecko);
     if (css && forceCssPoll && useNative) {
       useNative = false;
@@ -1914,7 +1916,6 @@ var modulex = (function (undefined) {
           each(comboUris.js, function (one) {
             each(one.mods, function (mod) {
               // fix #111
-              // https://github.com/kissyteam/modulex/issues/111
               if (!mod.factory) {
                 var msg = mod.id +
                   ' is not loaded! can not find module in uri: ' +
