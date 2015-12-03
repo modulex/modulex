@@ -1,7 +1,7 @@
 /*
-Copyright 2015, modulex@1.7.10
+Copyright 2015, modulex@1.8.0
 MIT Licensed
-build time: Wed, 18 Mar 2015 04:51:15 GMT
+build time: Thu, 03 Dec 2015 10:58:37 GMT
 */
 /**
  * A module registration and load library.
@@ -49,11 +49,11 @@ var modulex = (function (undefined) {
   var mx = {
     /**
      * The build time of the library.
-     * NOTICE: 'Wed, 18 Mar 2015 04:51:15 GMT' will replace with current timestamp when compressing.
+     * NOTICE: 'Thu, 03 Dec 2015 10:58:38 GMT' will replace with current timestamp when compressing.
      * @private
      * @type {String}
      */
-    __BUILD_TIME: 'Wed, 18 Mar 2015 04:51:15 GMT',
+    __BUILD_TIME: 'Thu, 03 Dec 2015 10:58:38 GMT',
 
     /**
      * modulex Environment.
@@ -81,10 +81,10 @@ var modulex = (function (undefined) {
 
     /**
      * The version of the library.
-     * NOTICE: '1.7.10' will replace with current version when compressing.
+     * NOTICE: '1.8.0' will replace with current version when compressing.
      * @type {String}
      */
-    version: '1.7.10',
+    version: '1.8.0',
 
     /**
      * set modulex configuration
@@ -1750,8 +1750,26 @@ var modulex = (function (undefined) {
         cjs: 1
       };
     }
-    // modulex.add(function(){}), modulex.add('a'), modulex.add(function(){},{requires:[]})
-    if (typeof id === 'function' || argsLen === 1) {
+    // umd: define([],function(){});
+    if (Utils.isArray(id) && typeof factory === 'function') {
+      config = {
+        requires: id
+      };
+      if (oldIE) {
+        // http://groups.google.com/group/commonjs/browse_thread/thread/5a3358ece35e688e/43145ceccfb1dc02#43145ceccfb1dc02
+        id = findModuleIdByInteractive();
+        addModule(id, factory, config);
+        startLoadModId = null;
+        startLoadModTime = 0;
+      } else {
+        // standard browser associates id with definition when onload
+        currentMod = {
+          factory: factory,
+          config: config
+        };
+      }
+    } else if (typeof id === 'function' || argsLen === 1) {
+      // modulex.add(function(){}), modulex.add('a'), modulex.add(function(){},{requires:[]})
       config = factory;
       factory = id;
       config = checkRequire(config, factory);
@@ -2548,6 +2566,9 @@ var modulex = (function (undefined) {
       comboMaxFileNum: 40
     }, getBaseInfo('modulex')));
   }
+
+  // conform to amd
+  mx.add.amd = true;
 
   if (typeof global === 'undefined' && typeof window !== 'undefined') {
     var win = window;

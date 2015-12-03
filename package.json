@@ -1,6 +1,6 @@
 {
   "name": "modulex",
-  "version": "1.7.12",
+  "version": "1.8.0",
   "description": "A module registration and load library",
   "author": "yiminghe <yiminghe@gmail.com>",
   "engines": {
@@ -32,12 +32,11 @@
     "mocha": "^1.21.4",
     "node-jscover": "^0.6.10",
     "node-jscover-coveralls": "^2.0.0",
-    "precommit-hook": "^1.0.7",
+    "pre-commit": "1.x",
     "q": "^1.0.1",
     "saucelabs-runner": "2.x"
   },
-  "spm": {},
-  "precommit": [
+  "pre-commit": [
     "lint"
   ],
   "config": {
