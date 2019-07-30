@@ -1,7 +1,7 @@
 /*
-Copyright 2015, modulex@1.8.0
+Copyright 2019, modulex@1.8.0
 MIT Licensed
-build time: Thu, 03 Dec 2015 10:58:37 GMT
+build time: Tue, 30 Jul 2019 15:47:37 GMT
 */
 /**
  * A module registration and load library.
@@ -49,11 +49,11 @@ var modulex = (function (undefined) {
   var mx = {
     /**
      * The build time of the library.
-     * NOTICE: 'Thu, 03 Dec 2015 10:58:38 GMT' will replace with current timestamp when compressing.
+     * NOTICE: 'Tue, 30 Jul 2019 15:47:38 GMT' will replace with current timestamp when compressing.
      * @private
      * @type {String}
      */
-    __BUILD_TIME: 'Thu, 03 Dec 2015 10:58:38 GMT',
+    __BUILD_TIME: 'Tue, 30 Jul 2019 15:47:38 GMT',
 
     /**
      * modulex Environment.
@@ -181,6 +181,10 @@ var modulex = (function (undefined) {
  * @author yiminghe@gmail.com
  */
 (function (mx) {
+  var isArray = Array.isArray ||
+    function (obj) {
+      return Object.prototype.toString.call(obj) === '[object Array]';
+    };
   var Loader = mx.Loader;
   var Env = mx.Env;
   var Status = Loader.Status;
@@ -198,51 +202,51 @@ var modulex = (function (undefined) {
 
   var URI_SPLIT_REG = new RegExp(
     '^' +
-      /*
-       Scheme names consist of a sequence of characters beginning with a
-       letter and followed by any combination of letters, digits, plus
-       ('+'), period ('.'), or hyphen ('-').
-       */
+    /*
+     Scheme names consist of a sequence of characters beginning with a
+     letter and followed by any combination of letters, digits, plus
+     ('+'), period ('.'), or hyphen ('-').
+     */
     '([\\w\\d+.-]+:)?' + // protocol
 
     '(?://' +
-      /*
-       The authority component is preceded by a double slash ('//') and is
-       terminated by the next slash ('/'), question mark ('?'), or number
-       sign ('#') character, or by the end of the URI.
-       */
+    /*
+     The authority component is preceded by a double slash ('//') and is
+     terminated by the next slash ('/'), question mark ('?'), or number
+     sign ('#') character, or by the end of the URI.
+     */
     '(?:([^/?#@]*)@)?' + // auth
 
     '(' +
     '[\\w\\d\\-\\u0100-\\uffff.+%]*' +
     '|' +
-      // ipv6
+    // ipv6
     '\\[[^\\]]+\\]' +
     ')' + // hostname - restrict to letters,
-      // digits, dashes, dots, percent
-      // escapes, and unicode characters.
+    // digits, dashes, dots, percent
+    // escapes, and unicode characters.
     '(?::([0-9]+))?' + // port
     ')?' +
-      /*
-       The path is terminated
-       by the first question mark ('?') or number sign ('#') character, or
-       by the end of the URI.
-       */
+    /*
+     The path is terminated
+     by the first question mark ('?') or number sign ('#') character, or
+     by the end of the URI.
+     */
     '([^?#]+)?' + // pathname. hierarchical part
-      /*
-       The query component is indicated by the first question
-       mark ('?') character and terminated by a number sign ('#') character
-       or by the end of the URI.
-       */
+    /*
+     The query component is indicated by the first question
+     mark ('?') character and terminated by a number sign ('#') character
+     or by the end of the URI.
+     */
     '(\\?[^#]*)?' + // search. non-hierarchical data
-      /*
-       The hash identifier component of a URI allows indirect
-       identification of a secondary resource by reference to a primary
-       resource and additional identifying information.
-       A
-       hash identifier component is indicated by the presence of a
-       number sign ('#') character and terminated by the end of the URI.
-       */
+    /*
+     The hash identifier component of a URI allows indirect
+     identification of a secondary resource by reference to a primary
+     resource and additional identifying information.
+     A
+     hash identifier component is indicated by the presence of a
+     number sign ('#') character and terminated by the end of the URI.
+     */
     '(#.*)?' + // hash
     '$');
 
@@ -378,10 +382,6 @@ var modulex = (function (undefined) {
     return ret;
   }
 
-  var isArray = Array.isArray || function (obj) {
-      return Object.prototype.toString.call(obj) === '[object Array]';
-    };
-
   function mix(to, from) {
     for (var i in from) {
       to[i] = from[i];
@@ -412,7 +412,7 @@ var modulex = (function (undefined) {
         for (var i = 0; i < len; i++) {
           var el = typeof arr === 'string' ? arr.charAt(i) : arr[i];
           if (el ||
-              //ie<9 in invalid when typeof arr == string
+            //ie<9 in invalid when typeof arr == string
             i in arr) {
             res[i] = fn.call(context || this, el, i, arr);
           }
@@ -762,16 +762,16 @@ var modulex = (function (undefined) {
      * user config
      *
      *  modulex.config('modules',{
-         *      x: {
-         *          y:1
-         *      }
-         *  })
+     *      x: {
+     *          y:1
+     *      }
+     *  })
      *
      *  x.js:
      *
      *  modulex.add(function(require, exports, module){
-         *      console.log(module.config().y);
-         *  });
+     *      console.log(module.config().y);
+     *  });
      */
     self.config = undefined;
 
@@ -1020,15 +1020,21 @@ var modulex = (function (undefined) {
 
     callFactory: function () {
       var self = this;
-      return self.factory.apply(self,
-        (
-          self.cjs ?
-            [self._require, self.exports, self] :
-            Utils.map(self.getRequiredModules(), function (m) {
-              return m.getExports();
-            })
-        )
-      );
+      var args;
+      if (self.amd) {
+        args = Utils.map(self.getRequiredModules(), function (m) {
+          return m.getExports();
+        });
+        if (self.exportsIndex !== undefined && self.exportsIndex !== -1) {
+          args.splice(self.exportsIndex, 0, self.exports);
+        }
+      } else {
+        args = (self.cjs ? [self._require, self.exports, self]
+          : Utils.map(self.getRequiredModules(), function (m) {
+            return m.getExports();
+          }));
+      }
+      return self.factory.apply(self, args);
     },
 
     initSelf: function () {
@@ -1630,6 +1636,9 @@ var modulex = (function (undefined) {
  * @author yiminghe@gmail.com
  */
 (function (mx, undefined) {
+  var currentMod;
+  var startLoadModId;
+  var startLoadModTime;
   var Loader = mx.Loader;
   var Config = mx.Config;
   var Status = Loader.Status;
@@ -1704,10 +1713,6 @@ var modulex = (function (undefined) {
     this.id = 'loader' + (++loaderId);
   }
 
-  var currentMod;
-  var startLoadModId;
-  var startLoadModTime;
-
   function checkRequire(config, factory) {
     // use require primitive statement
     // function(mx, require){ require('node') }
@@ -1752,8 +1757,12 @@ var modulex = (function (undefined) {
     }
     // umd: define([],function(){});
     if (Utils.isArray(id) && typeof factory === 'function') {
+      var originalId = id;
+      id = adaptRequirejs(id);
       config = {
-        requires: id
+        requires: id,
+        amd: 1,
+        exportsIndex: originalId.indexOf('exports')
       };
       if (oldIE) {
         // http://groups.google.com/group/commonjs/browse_thread/thread/5a3358ece35e688e/43145ceccfb1dc02#43145ceccfb1dc02
@@ -2291,6 +2300,7 @@ var modulex = (function (undefined) {
  LOADED: load into page
  INITIALIZED: factory executed
  */
+
 /**
  * @ignore
  * init loader, set config
@@ -2599,10 +2609,12 @@ modulex.add('i18n', {
  * @author yiminghe@gmail.com
  */
 (function (mx) {
+
   /*global require*/
   var fs = require('fs');
   var Utils = mx.Loader.Utils;
   var vm = require('vm');
+  var useDefine = 1;
   mx.getScript = function (uri, success, charset) {
     var error;
     if (typeof success === 'object') {
@@ -2669,7 +2681,6 @@ modulex.add('i18n', {
     }
   });
 
-  var useDefine = 1;
   mx.noConflict = function () {
     useDefine = 0;
   };
