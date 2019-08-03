@@ -1,60 +1,70 @@
 {
   "name": "modulex",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "description": "A module registration and load library",
   "author": "yiminghe <yiminghe@gmail.com>",
-  "engines": {
-    "node": ">=0.11"
-  },
-  "main": "build/modulex-nodejs.js",
   "devDependencies": {
+    "@pika/pack": "^0.4.0",
+    "@pika/plugin-build-umd": "0.5.x",
+    "@pika/plugin-standard-pkg": "^0.5.1",
+    "@pika/types": "^0.5.1",
     "combo-handler": "~1.1.0",
     "expect.js": "^0.3.1",
-    "gulp": "^3.8.7",
-    "gulp-clone": "^1.0.0",
-    "gulp-concat": "^2.3.4",
-    "gulp-footer": "^1.0.5",
-    "gulp-jscs": "^1.1.0",
-    "gulp-jshint": "^1.8.4",
-    "gulp-rename": "^1.2.0",
-    "gulp-replace": "^0.4.0",
-    "gulp-uglify": "^0.3.1",
-    "gulp-util": "^3.0.0",
-    "gulp-wrapper": "^0.1.5",
     "jquery": "^1.11.1",
-    "jshint": "^2.5.5",
-    "jshint-stylish": "^0.4.0",
     "koa": "~0.14.0",
     "koa-body": "~0.4.0",
     "koa-node-jscover": "~1.1.1",
     "koa-serve-index": "~1.0.1",
     "koa-static": "~1.4.8",
+    "lint-staged": "^7.2.0",
     "mocha": "^1.21.4",
     "node-jscover": "^0.6.10",
     "node-jscover-coveralls": "^2.0.0",
-    "pre-commit": "1.x",
+    "pre-commit": "^1.2.2",
+    "prettier": "^1.11.1",
     "q": "^1.0.1",
     "saucelabs-runner": "2.x"
   },
-  "pre-commit": [
-    "lint"
-  ],
   "config": {
     "port": 8000
   },
+  "@pika/pack": {
+    "pipeline": [
+      [
+        "@pika/plugin-standard-pkg"
+      ],
+      [
+        "@pika/plugin-build-umd",
+        {
+          "name": "modulex"
+        }
+      ]
+    ]
+  },
   "scripts": {
-    "start": "node --harmony server",
-    "lint": "gulp lint",
-    "publish": "gulp tag",
+    "lint-staged": "lint-staged",
+    "prettier": "prettier --write \"{src,__tests__}/**/*.{js,tsx}\"",
+    "pub": "np --no-publish --no-release-draft && npm run build && npm publish pkg",
+    "build": "pack build",
+    "start": "node server",
     "saucelabs": "gulp saucelabs",
-    "test": "node ./node_modules/mocha/bin/mocha tests/node/specs",
-    "browser-test": "mocha-phantomjs http://localhost:$npm_package_config_port/tests/runner.html",
-    "browser-test-cover": "mocha-phantomjs -R node_modules/node-jscover-coveralls/lib/reporters/mocha http://localhost:$npm_package_config_port/tests/runner.html?coverage",
-    "browser-test-build": "mocha-phantomjs http://localhost:$npm_package_config_port/tests/runner.html?build"
+    "test": "npm run build && node ./node_modules/mocha/bin/mocha tests/node/specs",
+    "browser-test": "npm run build && mocha-phantomjs http://localhost:$npm_package_config_port/tests/runner.html",
+    "browser-test-cover": "npm run build && mocha-phantomjs -R node_modules/node-jscover-coveralls/lib/reporters/mocha http://localhost:$npm_package_config_port/tests/runner.html?coverage",
+    "browser-test-build": "npm run build && mocha-phantomjs http://localhost:$npm_package_config_port/tests/runner.html?build"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "http://github.com/modulex/modulex.git"
-  }
+  },
+  "lint-staged": {
+    "*.{tsx,js,jsx,ts}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "pre-commit": [
+    "lint-staged"
+  ]
 }

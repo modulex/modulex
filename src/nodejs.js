@@ -4,14 +4,13 @@
  * so loader need not to be changed.
  * @author yiminghe@gmail.com
  */
-(function (mx) {
-
+exports.init = function(mx) {
   /*global require*/
   var fs = require('fs');
   var Utils = mx.Loader.Utils;
   var vm = require('vm');
   var useDefine = 1;
-  mx.getScript = function (uri, success, charset) {
+  mx.getScript = function(uri, success, charset) {
     var error;
     if (typeof success === 'object') {
       charset = success.charset;
@@ -41,7 +40,10 @@
       // noinspection JSUnresolvedFunction
       // use path, or else use uri will error in nodejs debug mode
       var define = useDefine ? ', define' : '';
-      var factory = vm.runInThisContext('(function(modulex' + define + '){' + mod + '})', uri);
+      var factory = vm.runInThisContext(
+        '(function(modulex' + define + '){' + mod + '})',
+        uri,
+      );
       factory(mx, mx.add);
       if (success) {
         success();
@@ -58,26 +60,21 @@
   module.exports = mx;
 
   mx.config({
-    charset: 'utf-8'
+    charset: 'utf-8',
   });
 
   // require synchronously in node js
-  mx.nodeRequire = function (id) {
+  mx.nodeRequire = function(id) {
     var ret = [];
-    mx.use([id], function () {
+    mx.use([id], function() {
       ret = arguments;
     });
     return ret[0];
   };
 
-  mx.config('packages', {
-    core: {
-      filter: '',
-      base: __dirname
-    }
-  });
-
-  mx.noConflict = function () {
+  mx.noConflict = function() {
     useDefine = 0;
   };
-})(modulex);
+
+  return mx;
+};

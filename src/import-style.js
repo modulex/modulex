@@ -4,7 +4,7 @@
  * @ignore
  * @author yiminghe@gmail.com
  */
-(function (mx) {
+(function(mx) {
   var method = 'writeln';
 
   function importStyle(modIds, __test) {
@@ -18,12 +18,12 @@
     var loader = new ComboLoader();
     var mods = Utils.createModules(modIds);
     var unloadedMods = [];
-    each(mods, function (mod) {
+    each(mods, function(mod) {
       unloadedMods.push.apply(unloadedMods, mod.getNormalizedModules());
     });
     unloadedMods = loader.calculate(unloadedMods, []);
     var unloadedCssMods = [];
-    each(unloadedMods, function (mod) {
+    each(unloadedMods, function(mod) {
       if (mod.getType() === 'css') {
         mod.status = Status.INITIALIZED;
         unloadedCssMods.push(mod);
@@ -37,7 +37,7 @@
     }
     // load css first to avoid page blink
     if (comboUris.css) {
-      each(comboUris.css, function (rs) {
+      each(comboUris.css, function(rs) {
         document[method](' <link rel="stylesheet" href="' + rs.uri + '">');
       });
     }

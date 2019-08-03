@@ -34,30 +34,16 @@
             }
             return ret;
         }
-
-        var build = location.search.indexOf('build') !== -1;
-        var i;
-        var files = [];
-        if (build) {
-            files = ['/build/modulex-debug.js', '/build/import-style-debug.js'];
-        } else {
-            var sources = ['modulex',
-                'utils', 'data-structure',
-                'css-onload', 'get-script',
-                'configs', 'combo-loader',
-                'init', 'i18n', 'import-style'];
-
-            files = map(sources, function (f) {
-                return '/lib/' + f + (isCoverage ? '-coverage' : '') + '.js';
-            })
-        }
-        for (i = 0; i < files.length; i++) {
-            window.document.write('<script src="' + files[i] + '"' + '>' + '<' + '/script>');
+        var files = ['/pkg/dist-umd/index.js', '/pkg/dist-src/import-style.js'];
+        for (var i = 0; i < files.length; i++) {
+            window.document.write('<script src="' + files[i] + '"' + ' data-name="modulex">' + '<' + '/script>');
         }
     })();
 </script>
+<script>
+self.modulex=self.modulex['default'];
+</script>
 <script src="/tests/others/clear.js"></script>
-<script src="/tests/specs/core-package/test-spec.js"></script>
 <script src="/tests/specs/catch-init-error/catch-init-error-spec.js"></script>
 <script src="/tests/specs/add_require/add-require-spec.js"></script>
 <script src="/tests/specs/absolute-module/absolute-require-spec.js"></script>

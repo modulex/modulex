@@ -1,5 +1,6 @@
 var expect = require('expect.js');
-var modulex = require('../../../build/modulex-nodejs');
+var modulex = require('../../../pkg/dist-umd/index').default;
+modulex=require('../../../pkg/dist-src/nodejs').init(modulex);
 var path = require('path');
 
 describe('modulex', function () {

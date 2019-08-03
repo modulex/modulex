@@ -15,32 +15,7 @@
  */
 /* exported modulex */
 /* jshint -W079 */
-var modulex = (function (undefined) {
-  // Console-polyfill. MIT license.
-// https://github.com/paulmillr/console-polyfill
-// Make it safe to do console.log() always.
-  (function (con) {
-    'use strict';
-    var prop, method;
-    var empty = {};
-    var dummy = function () {
-    };
-    var properties = 'memory'.split(',');
-    var methods = ('assert,clear,count,debug,dir,dirxml,error,exception,group,' +
-    'groupCollapsed,groupEnd,info,log,markTimeline,profile,profiles,profileEnd,' +
-    'show,table,time,timeEnd,timeline,timelineEnd,timeStamp,trace,warn').split(',');
-    while ((prop = properties.pop())) {
-      if (!(prop in con)) {
-        con[prop] = empty;
-      }
-    }
-    while ((method = methods.pop())) {
-      if (!(method in con)) {
-        con[method] = dummy;
-      }
-    }
-  })(this.console = this.console || {}); // Using `this` for web workers.
-
+var modulex = (function(undefined) {
   var mx = {
     /**
      * The build time of the library.
@@ -55,8 +30,8 @@ var modulex = (function (undefined) {
      * @type {Object}
      */
     Env: {
-      host: this,
-      mods: {}
+      host: self,
+      mods: {},
     },
 
     /**
@@ -71,7 +46,7 @@ var modulex = (function (undefined) {
     Config: {
       debug: '@DEBUG@',
       packages: {},
-      fns: {}
+      fns: {},
     },
 
     /**
@@ -99,21 +74,21 @@ var modulex = (function (undefined) {
      * for example:
      *     @example
      *     modulex.config({
-         *      combine: true,
-         *      base: '.',
-         *      packages: {
-         *          'gallery': {
-         *              base: 'http://a.tbcdn.cn/s/modulex/gallery/'
-         *          }
-         *      },
-         *      modules: {
-         *          'gallery/x/y': {
-         *              requires: ['gallery/x/z']
-         *          }
-         *      }
-         *     });
+     *      combine: true,
+     *      base: '.',
+     *      packages: {
+     *          'gallery': {
+     *              base: 'http://a.tbcdn.cn/s/modulex/gallery/'
+     *          }
+     *      },
+     *      modules: {
+     *          'gallery/x/y': {
+     *              requires: ['gallery/x/z']
+     *          }
+     *      }
+     *     });
      */
-    config: function (configName, configValue) {
+    config(configName, configValue) {
       var cfg, r, fn;
       var Config = mx.Config;
       var configFns = Config.fns;
@@ -145,10 +120,10 @@ var modulex = (function (undefined) {
         }
       }
       return r;
-    }
+    },
   };
 
-  var Loader = mx.Loader = {};
+  var Loader = (mx.Loader = {});
 
   /**
    * Loader Status Enum
@@ -166,8 +141,10 @@ var modulex = (function (undefined) {
     /** initializing */
     INITIALIZING: 3,
     /** initialized */
-    INITIALIZED: 4
+    INITIALIZED: 4,
   };
 
   return mx;
 })();
+
+export default modulex;

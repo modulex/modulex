@@ -151,10 +151,10 @@ describe('ComboLoader', function () {
     it('should trunk uri by comboMaxUriLength automatically', function () {
         mx.config({
             'comboMaxFileNum': 9999,
-            base: '/tests/',
             packages: {
                 core: {
-                    filter: 'debug'
+                    filter: 'debug',
+                    base:'/tests/'
                 }
             }
         });
@@ -165,9 +165,9 @@ describe('ComboLoader', function () {
         for (var i = 0; i < 100; i++) {
             var r2 = [];
             for (var j = 0; j < 5; j++) {
-                r2.push('y' + (k++));
+                r2.push('core/y' + (k++));
             }
-            x['y' + i] = {
+            x['core/y' + i] = {
                 requires: r2
             };
         }
@@ -178,7 +178,7 @@ describe('ComboLoader', function () {
 
         var ret = [];
         for (i = 0; i < 100; i++) {
-            ret.push('y' + i);
+            ret.push('core/y' + i);
         }
         var r;
         r = l.calculate(Utils.createModules(ret));
