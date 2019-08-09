@@ -36,7 +36,7 @@
   "scripts": {
     "lint-staged": "lint-staged",
     "prettier": "prettier --write \"{src,tests}/**/*.{js,tsx}\"",
-    "pub": "npm run build && npm run test2 && np --yolo --no-release-draft",
+    "pub": "npm run test && np --yolo --no-publish --no-release-draft &&npm run build && npm publish",
     "build": "node scripts/build",
     "start": "node server",
     "saucelabs": "gulp saucelabs",
