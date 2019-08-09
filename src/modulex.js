@@ -31,7 +31,7 @@ var mx = {
    * @type {Object}
    */
   Env: {
-    host: self,
+    host: typeof self !== 'undefined' ? self : global,
     mods: {},
   },
 

@@ -8,7 +8,7 @@ const MINIFY = !!process.env.MINIFY;
 const config = {
   input: 'src/index.js',
   output: {
-    file: `build/modulex${MINIFY ? '' : '.debug'}.js`,
+    file: `build/modulex${MINIFY ? '' : '-debug'}.js`,
     format: 'iife',
     name: 'modulex',
   },

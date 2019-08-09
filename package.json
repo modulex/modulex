@@ -7,6 +7,7 @@
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "combo-handler": "~1.1.0",
+    "cross-spawn": "^6.0.5",
     "expect.js": "^0.3.1",
     "jquery": "^1.11.1",
     "koa": "~0.14.0",
@@ -36,11 +37,12 @@
   "scripts": {
     "lint-staged": "lint-staged",
     "prettier": "prettier --write \"{src,tests}/**/*.{js,tsx}\"",
-    "pub": "npm run build && np --yolo --no-release-draft",
-    "build": "rm -rf build && rollup -c && MINIFY=true rollup -c && cp src/import-style.js build/",
+    "pub": "npm run build && npm run test2 && np --yolo --no-release-draft",
+    "build": "node scripts/build",
     "start": "node server",
     "saucelabs": "gulp saucelabs",
-    "test": "npm run build && node ./node_modules/mocha/bin/mocha tests/node/specs",
+    "test2": " node ./node_modules/mocha/bin/mocha tests/node/specs",
+    "test": "npm run build && npm run test2",
     "browser-test": "npm run build && mocha-phantomjs http://localhost:$npm_package_config_port/tests/runner.html",
     "browser-test-cover": "npm run build && mocha-phantomjs -R node_modules/node-jscover-coveralls/lib/reporters/mocha http://localhost:$npm_package_config_port/tests/runner.html?coverage",
     "browser-test-build": "npm run build && mocha-phantomjs http://localhost:$npm_package_config_port/tests/runner.html?build"
