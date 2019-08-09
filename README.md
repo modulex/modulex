@@ -7,10 +7,7 @@ A module registration and load library
 [![NPM downloads](http://img.shields.io/npm/dm/modulex.svg)](https://npmjs.org/package/modulex)
 [![Build Status](https://secure.travis-ci.org/modulex/modulex.png?branch=master)](https://travis-ci.org/modulex/modulex)
 [![Coverage Status](https://coveralls.io/repos/modulex/modulex/badge.png?branch=master)](https://coveralls.io/r/modulex/modulex?branch=master)
-[![Dependency Status](https://gemnasium.com/modulex/modulex.png)](https://gemnasium.com/modulex/modulex)
-[![Bower version](https://badge.fury.io/bo/modulex.svg)](http://badge.fury.io/bo/modulex)
 [![Sauce Test Status](https://saucelabs.com/buildstatus/modulex)](https://saucelabs.com/u/modulex)
-
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/modulex.svg)](https://saucelabs.com/u/modulex)
 
 ## docs
