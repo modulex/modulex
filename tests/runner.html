@@ -26,6 +26,7 @@
 </script>
 <script>
     var isCoverage = location.search.indexOf('coverage') !== -1;
+     var isBuild = location.search.indexOf('build') !== -1;
     (function () {
         function map(arr, fn) {
             var ret = [];
@@ -34,7 +35,7 @@
             }
             return ret;
         }
-        var files = ['/build/modulex.debug.js', '/build/import-style.js'];
+        var files = [isBuild?'/build/modulex.js':'/build/modulex-debug.js', '/build/import-style.js'];
         for (var i = 0; i < files.length; i++) {
             window.document.write('<script src="' + files[i] + '"' + ' data-name="modulex">' + '<' + '/script>');
         }

@@ -12,7 +12,7 @@ const commands = [
       env: { ...process.env, MINIFY: 'true' },
     },
   ],
-  //['cp', ['src/import-style.js', 'build/']],
+  ['cp', ['src/import-style.js', 'build/']],
 ];
 
 commands.every(c => {
