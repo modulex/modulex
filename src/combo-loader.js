@@ -4,21 +4,29 @@
  * @author yiminghe@gmail.com
  */
 import mx from './modulex';
+import { addModule } from './Module';
+import Status from './Status';
+import {
+  each,
+  getHash,
+  UA,
+  isArray,
+  mix,
+  noop,
+  docHead,
+  isSameOriginAs,
+  startsWith,
+  getRequiresFromFn,
+} from './utils';
 
 var currentMod;
 var startLoadModId;
 var startLoadModTime;
-var Loader = mx.Loader;
 var Config = mx.Config;
-var Status = Loader.Status;
-var Utils = Loader.Utils;
-var addModule = Utils.addModule;
-var each = Utils.each;
-var getHash = Utils.getHash;
 var LOADING = Status.LOADING;
 var LOADED = Status.LOADED;
 var ERROR = Status.ERROR;
-var oldIE = Utils.ieMode && Utils.ieMode < 10;
+var oldIE = UA.ieMode && UA.ieMode < 10;
 
 function loadScripts(rss, callback, timeout) {
   var count = rss && rss.length;
@@ -56,7 +64,7 @@ function loadScripts(rss, callback, timeout) {
         mod = undefined;
       } else if (oldIE) {
         startLoadModId = mod.id;
-        if ('@DEBUG@') {
+        if (__DEV__) {
           startLoadModTime = +new Date();
         }
         config.attrs = {
@@ -86,7 +94,7 @@ function checkRequire(config, factory) {
   // use require primitive statement
   // function(mx, require){ require('node') }
   if (!config && typeof factory === 'function') {
-    var requires = Utils.getRequiresFromFn(factory);
+    var requires = getRequiresFromFn(factory);
     if (requires.length) {
       config = config || {};
       config.requires = requires;
@@ -115,7 +123,7 @@ function adaptRequirejs(requires) {
 
 ComboLoader.add = function(id, factory, config, argsLen) {
   // modulex.add('xx',[],function(){});
-  if (argsLen === 3 && Utils.isArray(factory)) {
+  if (argsLen === 3 && isArray(factory)) {
     var tmp = factory;
     factory = config;
     config = {
@@ -124,7 +132,7 @@ ComboLoader.add = function(id, factory, config, argsLen) {
     };
   }
   // umd: define([],function(){});
-  if (Utils.isArray(id) && typeof factory === 'function') {
+  if (isArray(id) && typeof factory === 'function') {
     var originalId = id;
     id = adaptRequirejs(id);
     config = {
@@ -203,7 +211,7 @@ function findModuleIdByInteractive() {
 
 var debugRemoteModules;
 
-if ('@DEBUG@') {
+if (__DEV__) {
   debugRemoteModules = function(rss) {
     each(rss, function(rs) {
       var ms = [];
@@ -264,7 +272,7 @@ function getUriConsiderCommonPrefix(
   }
 }
 
-Utils.mix(ComboLoader.prototype, {
+mix(ComboLoader.prototype, {
   /**
    * load modules asynchronously
    */
@@ -280,13 +288,13 @@ Utils.mix(ComboLoader.prototype, {
       loadScripts(
         comboUris.css,
         function(success, error) {
-          if ('@DEBUG@') {
+          if (__DEV__) {
             debugRemoteModules(success);
           }
 
           each(success, function(one) {
             each(one.mods, function(mod) {
-              addModule(mod.id, Utils.noop);
+              addModule(mod.id, noop);
               // notify all loader instance
               mod.flush();
             });
@@ -326,7 +334,7 @@ Utils.mix(ComboLoader.prototype, {
       loadScripts(
         comboUris.js,
         function(success) {
-          if ('@DEBUG@') {
+          if (__DEV__) {
             debugRemoteModules(success);
           }
 
@@ -370,7 +378,7 @@ Utils.mix(ComboLoader.prototype, {
     var i, m, mod, modStatus, stackDepth;
     var self = this;
 
-    if ('@DEBUG@') {
+    if (__DEV__) {
       stack = stack || [];
     }
     ret = ret || [];
@@ -386,7 +394,7 @@ Utils.mix(ComboLoader.prototype, {
         continue;
       }
 
-      if ('@DEBUG@') {
+      if (__DEV__) {
         stackDepth = stack.length;
       }
 
@@ -408,7 +416,7 @@ Utils.mix(ComboLoader.prototype, {
         self.wait(mod);
       }
 
-      if ('@DEBUG@') {
+      if (__DEV__) {
         // do not use indexOf, poor performance in ie8
         if (stack[m]) {
           console.warn('find cyclic dependency between mods: ' + stack);
@@ -428,7 +436,7 @@ Utils.mix(ComboLoader.prototype, {
         ret,
       );
       cache[m] = 1;
-      if ('@DEBUG@') {
+      if (__DEV__) {
         for (var si = stackDepth; si < stack.length; si++) {
           stack[stack[si]] = 0;
         }
@@ -494,8 +502,8 @@ Utils.mix(ComboLoader.prototype, {
         var typeGroup = typeGroups[group] || (typeGroups[group] = {});
         var find = 0;
         /*jshint loopfunc:true*/
-        Utils.each(typeGroup, function(tmpMods, prefix) {
-          if (Utils.isSameOriginAs(prefix, packageBase)) {
+        each(typeGroup, function(tmpMods, prefix) {
+          if (isSameOriginAs(prefix, packageBase)) {
             var newPrefix = getCommonPathPrefix(prefix, packageBase);
             tmpMods.push(mod);
             if (tag && tag !== tmpMods.tag) {
@@ -583,7 +591,7 @@ Utils.mix(ComboLoader.prototype, {
           !currentMod.getPackage() ||
           !currentMod.getPackage().isCombine() ||
           // use(x/y) packageName: x/y ...
-          !Utils.startsWith(uri, basePrefix)
+          !startsWith(uri, basePrefix)
         ) {
           res.push({
             combine: 0,
@@ -693,7 +701,7 @@ Utils.mix(ComboLoader.prototype, {
   },
 });
 
-Loader.ComboLoader = ComboLoader;
+export default ComboLoader;
 /*
  2014-03-24 yiminghe@gmail.com
  - refactor group combo logic

@@ -4,10 +4,16 @@
  * @author yiminghe@gmail.com
  */
 import mx from './modulex';
+import { createModule } from './Module';
+import Package from './Package';
+import {
+  endsWith,
+  each,
+  startsWith,
+  normalizePath,
+  normalizeSlash,
+} from './utils';
 
-var Loader = mx.Loader;
-var Package = Loader.Package;
-var Utils = Loader.Utils;
 var host = mx.Env.host;
 var Config = mx.Config;
 var location = host && host.location;
@@ -27,7 +33,7 @@ Config.resolveModFn = function(mod) {
   var packageInfo = mod.getPackage();
   // absolute module url
   if (!packageInfo) {
-    if (!Utils.endsWith(id, '.css') && !Utils.endsWith(id, '.js')) {
+    if (!endsWith(id, '.css') && !endsWith(id, '.js')) {
       id += '.js';
     }
     return id;
@@ -37,7 +43,7 @@ Config.resolveModFn = function(mod) {
   var extname = mod.getType();
   var suffix = '.' + extname;
   if (!subPath) {
-    if (Utils.endsWith(id, suffix)) {
+    if (endsWith(id, suffix)) {
       id = id.slice(0, -suffix.length);
     }
     filter = packageInfo.getFilter() || '';
@@ -75,25 +81,25 @@ configFns.packages = function(config) {
   if (config === undefined) {
     return packages;
   }
+  if (config === false) {
+    Config.packages = {};
+  }
   if (config) {
-    Utils.each(config, function(cfg, key) {
+    each(config, function(cfg, key) {
       // object type
       var name = cfg.name || key;
-      if (Utils.startsWith(name, '/')) {
+      if (startsWith(name, '/')) {
         name = location.protocol + '//' + location.host + name;
-      } else if (
-        Utils.startsWith(name, './') ||
-        Utils.startsWith(name, '../')
-      ) {
-        name = Utils.normalizePath(location.href, name);
+      } else if (startsWith(name, './') || startsWith(name, '../')) {
+        name = normalizePath(location.href, name);
       }
-      if (Utils.endsWith(name, '/')) {
+      if (endsWith(name, '/')) {
         name = name.slice(0, -1);
       }
       cfg.name = name;
       var base = cfg.base || cfg.path;
       if (base) {
-        cfg.base = normalizePath(base, true);
+        cfg.base = normalizeUrl(base, true);
       }
       if (packages[name]) {
         packages[name].reset(cfg);
@@ -106,12 +112,12 @@ configFns.packages = function(config) {
 
 configFns.modules = function(modules) {
   if (modules) {
-    Utils.each(modules, function(modCfg, id) {
+    each(modules, function(modCfg, id) {
       var uri = modCfg.uri;
       if (uri) {
-        modCfg.uri = normalizePath(uri);
+        modCfg.uri = normalizeUrl(uri);
       }
-      Utils.createModule(id, modCfg);
+      createModule(id, modCfg);
     });
   }
 };
@@ -127,17 +133,17 @@ function shortcut(attr) {
   };
 }
 
-function normalizePath(base, isDirectory) {
-  base = Utils.normalizeSlash(base);
+function normalizeUrl(base, isDirectory) {
+  base = normalizeSlash(base);
   if (isDirectory && base.charAt(base.length - 1) !== '/') {
     base += '/';
   }
   if (location) {
     if (
-      Utils.startsWith(base, 'http:') ||
-      Utils.startsWith(base, '//') ||
-      Utils.startsWith(base, 'https:') ||
-      Utils.startsWith(base, 'file:')
+      startsWith(base, 'http:') ||
+      startsWith(base, '//') ||
+      startsWith(base, 'https:') ||
+      startsWith(base, 'file:')
     ) {
       return base;
     }
@@ -145,7 +151,7 @@ function normalizePath(base, isDirectory) {
       location.protocol +
       '//' +
       location.host +
-      Utils.normalizePath(location.pathname, base);
+      normalizePath(location.pathname, base);
   }
   return base;
 }

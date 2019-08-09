@@ -1,4 +1,4 @@
-define(function(){
-    cjsTest.push(3);
-    return 2;
+define(function() {
+  cjsTest.push(3);
+  return 2;
 });

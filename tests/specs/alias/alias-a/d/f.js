@@ -1,3 +1,3 @@
-define('alias-a/d/f', function (mx) {
-    return 'alias-a/d/f';
+define('alias-a/d/f', function(mx) {
+  return 'alias-a/d/f';
 });

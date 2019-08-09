@@ -1,3 +1,3 @@
-define("z/z",function(){
-   return 1;
+define('z/z', function() {
+  return 1;
 });

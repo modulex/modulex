@@ -1,5 +1,3 @@
-define(function(){
-
-},{
-    requires:['timeout/r2']
+define(function() {}, {
+  requires: ['timeout/r2'],
 });

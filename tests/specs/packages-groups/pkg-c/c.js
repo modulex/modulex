@@ -1,3 +1,3 @@
-define("pkg-c/c",function(){
-   return 3;
+define('pkg-c/c', function() {
+  return 3;
 });

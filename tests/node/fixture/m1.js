@@ -1,3 +1,3 @@
-define(function(require){
-    return require('./m2')+1;
+define(function(require) {
+  return require('./m2') + 1;
 });

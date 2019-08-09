@@ -4,10 +4,8 @@
   "description": "A module registration and load library",
   "author": "yiminghe <yiminghe@gmail.com>",
   "devDependencies": {
-    "@pika/pack": "^0.4.0",
-    "@pika/plugin-build-umd": "0.5.x",
-    "@pika/plugin-standard-pkg": "^0.5.1",
-    "@pika/types": "^0.5.1",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
     "combo-handler": "~1.1.0",
     "expect.js": "^0.3.1",
     "jquery": "^1.11.1",
@@ -23,29 +21,23 @@
     "pre-commit": "^1.2.2",
     "prettier": "^1.11.1",
     "q": "^1.0.1",
+    "rollup": "^1.19.4",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-uglify": "^6.0.2",
     "saucelabs-runner": "2.x"
   },
+  "files": [
+    "build"
+  ],
   "config": {
     "port": 8000
   },
-  "@pika/pack": {
-    "pipeline": [
-      [
-        "@pika/plugin-standard-pkg"
-      ],
-      [
-        "@pika/plugin-build-umd",
-        {
-          "name": "modulex"
-        }
-      ]
-    ]
-  },
   "scripts": {
     "lint-staged": "lint-staged",
-    "prettier": "prettier --write \"{src,__tests__}/**/*.{js,tsx}\"",
-    "pub": "np --no-publish --no-release-draft && npm run build && npm publish pkg",
-    "build": "pack build",
+    "prettier": "prettier --write \"{src,tests}/**/*.{js,tsx}\"",
+    "pub": "npm run build && np --no-publish --no-release-draft",
+    "build": "rm -rf build && rollup -c && MINIFY=true rollup -c && cp src/import-style.js build/",
     "start": "node server",
     "saucelabs": "gulp saucelabs",
     "test": "npm run build && node ./node_modules/mocha/bin/mocha tests/node/specs",

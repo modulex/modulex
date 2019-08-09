@@ -1,2 +1,1 @@
-define("timestamp/z", function () {
-})
+define('timestamp/z', function() {});

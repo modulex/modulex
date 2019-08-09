@@ -1,5 +1,5 @@
-define(function(n){
-    return n+1;
-},{
-    requires:['./b']
+define(function(n) {
+  return n + 1;
+}, {
+  requires: ['./b'],
 });

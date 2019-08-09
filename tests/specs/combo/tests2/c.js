@@ -1,3 +1,3 @@
-define("tests2/c", function () {
-    return 1;
+define('tests2/c', function() {
+  return 1;
 });

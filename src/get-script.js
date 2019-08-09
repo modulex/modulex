@@ -4,14 +4,15 @@
  * @author yiminghe@gmail.com
  */
 import mx from './modulex';
+import { UA, docHead, endsWith, each } from './utils';
+import { pollCss } from './css-onload';
 
 var MILLISECONDS_OF_SECOND = 1000;
 var win = mx.Env.host;
 var doc = win && win.document;
-var Utils = mx.Loader.Utils;
 // solve concurrent requesting same script file
 var jsCssCallbacks = {};
-var webkit = Utils.webkit;
+var webkit = UA.webkit;
 var headNode;
 
 /**
@@ -41,11 +42,11 @@ var headNode;
  * @return {HTMLElement} script/style node
  * @member modulex
  */
-mx.getScript = function(uri, success, charset) {
+export default function getScript(uri, success, charset) {
   // can not use modulex.Uri, uri can not be encoded for some uri
   // eg: /??dom.js,event.js , ? , should not be encoded
   var config = success;
-  var css = Utils.endsWith(uri, '.css');
+  var css = endsWith(uri, '.css');
   var error, timeout, attrs, callbacks, timer;
   if (typeof config === 'object') {
     success = config.success;
@@ -54,7 +55,7 @@ mx.getScript = function(uri, success, charset) {
     charset = config.charset;
     attrs = config.attrs;
   }
-  if (css && Utils.ieMode < 10) {
+  if (css && UA.ieMode < 10) {
     if (
       doc.getElementsByTagName('style').length +
         doc.getElementsByTagName('link').length >=
@@ -86,7 +87,7 @@ mx.getScript = function(uri, success, charset) {
     }
   };
   if (attrs) {
-    Utils.each(attrs, function(v, n) {
+    each(attrs, function(v, n) {
       node.setAttribute(n, v);
     });
   }
@@ -107,7 +108,7 @@ mx.getScript = function(uri, success, charset) {
     var index = error;
     var fn;
     clearTimer();
-    Utils.each(jsCssCallbacks[uri], function(callback) {
+    each(jsCssCallbacks[uri], function(callback) {
       if ((fn = callback[index])) {
         fn.call(node);
       }
@@ -124,7 +125,7 @@ mx.getScript = function(uri, success, charset) {
     mx.Config.forceCssPoll ||
     (webkit && webkit < 536) ||
     // unknown browser defaults to css poll
-    (!webkit && !Utils.trident && !Utils.gecko);
+    (!webkit && !UA.trident && !UA.gecko);
   if (css && forceCssPoll && useNative) {
     useNative = false;
   }
@@ -146,7 +147,7 @@ mx.getScript = function(uri, success, charset) {
     };
   } else if (css) {
     // old chrome/firefox for css
-    Utils.pollCss(node, function() {
+    pollCss(node, function() {
       end(0);
     });
   } else {
@@ -158,7 +159,7 @@ mx.getScript = function(uri, success, charset) {
     }, timeout * MILLISECONDS_OF_SECOND);
   }
   if (!headNode) {
-    headNode = Utils.docHead();
+    headNode = docHead();
   }
   if (css) {
     // css order matters
@@ -169,7 +170,7 @@ mx.getScript = function(uri, success, charset) {
     headNode.insertBefore(node, headNode.firstChild);
   }
   return node;
-};
+}
 /*
  yiminghe@gmail.com refactor@2012-03-29
  - 考虑连续重复请求单个 script 的情况，内部排队

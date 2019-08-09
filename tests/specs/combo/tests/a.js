@@ -1,5 +1,5 @@
-define("tests/a", function (b) {
-    return b + 3;
+define('tests/a', function(b) {
+  return b + 3;
 }, {
-    requires:['./b']
+  requires: ['./b'],
 });

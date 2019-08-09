@@ -1,3 +1,3 @@
-define("y/y",function(){
-   return 2;
+define('y/y', function() {
+  return 2;
 });

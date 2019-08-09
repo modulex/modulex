@@ -1,3 +1,3 @@
-define('t',function(){
-    return 2;
+define('t', function() {
+  return 2;
 });

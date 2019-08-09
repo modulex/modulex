@@ -3,10 +3,10 @@
  * script/css load across browser
  * @author yiminghe@gmail.com
  */
-import mx from './modulex';
+
+import { UA, isEmptyObject } from './utils';
 
 var CSS_POLL_INTERVAL = 30;
-var Utils = mx.Loader.Utils;
 // central poll for link node
 var timer = 0;
 // node.id:{callback:callback,node:node}
@@ -18,9 +18,9 @@ function startCssTimer() {
   }
 }
 
-function isCssLoaded(node) {
+export function isCssLoaded(node) {
   var loaded = 0;
-  if (Utils.webkit) {
+  if (UA.webkit) {
     // http://www.w3.org/TR/Dom-Level-2-Style/stylesheets.html
     if (node.sheet) {
       loaded = 1;
@@ -58,7 +58,7 @@ function cssPoll() {
       delete monitors[uri];
     }
   }
-  if (Utils.isEmptyObject(monitors)) {
+  if (isEmptyObject(monitors)) {
     timer = 0;
   } else {
     timer = setTimeout(cssPoll, CSS_POLL_INTERVAL);
@@ -67,15 +67,13 @@ function cssPoll() {
 
 // refer : http://lifesinger.org/lab/2011/load-js-css/css-preload.html
 // 暂时不考虑如何判断失败，如 404 等
-Utils.pollCss = function(node, callback) {
+export function pollCss(node, callback) {
   var href = node.href;
   var arr = (monitors[href] = {});
   arr.node = node;
   arr.callback = callback;
   startCssTimer();
-};
-
-Utils.isCssLoaded = isCssLoaded;
+}
 /*
  References:
  - http://unixpapa.com/js/dyna.html

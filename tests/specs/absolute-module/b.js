@@ -1,3 +1,3 @@
-define(function (require) {
+define(function(require) {
   return 1;
 });

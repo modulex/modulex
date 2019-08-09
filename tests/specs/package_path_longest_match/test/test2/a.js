@@ -1,3 +1,3 @@
-define(function () {
-    return 9;
+define(function() {
+  return 9;
 });

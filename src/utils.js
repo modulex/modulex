@@ -1,27 +1,17 @@
 /**
- * Utils for modulex loader
+ * for modulex loader
  * @author yiminghe@gmail.com
  */
 import mx from './modulex';
 
-var isArray =
+export var isArray =
   Array.isArray ||
   function(obj) {
     return Object.prototype.toString.call(obj) === '[object Array]';
   };
-var Loader = mx.Loader;
+
 var Env = mx.Env;
-var Status = Loader.Status;
-var mods = Env.mods;
-var map = Array.prototype.map;
 var host = Env.host;
-/**
- * @class modulex.Loader.Utils
- * Utils for modulex Loader
- * @singleton
- * @private
- */
-var Utils = (Loader.Utils = {});
 var doc = host && host.document;
 
 var URI_SPLIT_REG = new RegExp(
@@ -138,6 +128,7 @@ function splitSlash(str) {
 
 var m, v;
 var ua = ((host && host.navigator) || {}).userAgent || '';
+export const UA = {};
 
 // AppleWebKit/535.19
 // AppleWebKit534.30
@@ -149,46 +140,31 @@ if (
     (m = ua.match(/Safari[\/]{0,1}([\d.]*)/))) &&
   m[1]
 ) {
-  Utils.webkit = numberify(m[1]);
+  UA.webkit = numberify(m[1]);
 }
 if ((m = ua.match(/Trident\/([\d.]*)/))) {
-  Utils.trident = numberify(m[1]);
+  UA.trident = numberify(m[1]);
 }
 if ((m = ua.match(/Gecko/))) {
-  Utils.gecko = 0.1; // Gecko detected, look for revision
+  UA.gecko = 0.1; // Gecko detected, look for revision
   if ((m = ua.match(/rv:([\d.]*)/)) && m[1]) {
-    Utils.gecko = numberify(m[1]);
+    UA.gecko = numberify(m[1]);
   }
 }
 if (
   (m = ua.match(/MSIE ([^;]*)|Trident.*; rv(?:\s|:)?([0-9.]+)/)) &&
   (v = m[1] || m[2])
 ) {
-  Utils.ie = numberify(v);
-  Utils.ieMode = doc.documentMode || Utils.ie;
-  Utils.trident = Utils.trident || 1;
+  UA.ie = numberify(v);
+  UA.ieMode = doc.documentMode || UA.ie;
+  UA.trident = UA.trident || 1;
 }
 
 var uriReg = /http(s)?:\/\/([^/]+)(?::(\d+))?/;
 var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/gm;
 var requireRegExp = /[^.'"]\s*require\s*\(\s*(['"])([^)]+)\1\s*\)/g;
 
-function normalizeId(id) {
-  if (id.charAt(0) === '/') {
-    id = location.protocol + '//' + location.host + id;
-  }
-  // 'x/' 'x/y/z/'
-  if (id.charAt(id.length - 1) === '/') {
-    id += 'index';
-  }
-  // x.js === x
-  if (Utils.endsWith(id, '.js')) {
-    id = id.slice(0, -3);
-  }
-  return id;
-}
-
-function each(obj, fn) {
+export function each(obj, fn) {
   var i = 0;
   var myKeys, l;
   if (isArray(obj)) {
@@ -209,7 +185,7 @@ function each(obj, fn) {
   }
 }
 
-function keys(obj) {
+export function keys(obj) {
   var ret = [];
   for (var key in obj) {
     ret.push(key);
@@ -217,244 +193,144 @@ function keys(obj) {
   return ret;
 }
 
-function mix(to, from) {
+export function mix(to, from) {
   for (var i in from) {
     to[i] = from[i];
   }
   return to;
 }
 
-mix(Utils, {
-  mix: mix,
+export function getSuffix(str) {
+  var m = str.match(/\.(\w+)$/);
+  if (m) {
+    return m[1];
+  }
+}
 
-  getSuffix(str) {
-    var m = str.match(/\.(\w+)$/);
-    if (m) {
-      return m[1];
+export function noop() {}
+
+export const map = Array.prototype.map
+  ? function(arr, fn, context) {
+      return Array.prototype.map.call(arr, fn, context || this);
     }
-  },
-
-  noop() {},
-
-  map: map
-    ? function(arr, fn, context) {
-        return map.call(arr, fn, context || this);
-      }
-    : function(arr, fn, context) {
-        var len = arr.length;
-        var res = new Array(len);
-        for (var i = 0; i < len; i++) {
-          var el = typeof arr === 'string' ? arr.charAt(i) : arr[i];
-          if (
-            el ||
-            //ie<9 in invalid when typeof arr == string
-            i in arr
-          ) {
-            res[i] = fn.call(context || this, el, i, arr);
-          }
+  : function(arr, fn, context) {
+      var len = arr.length;
+      var res = new Array(len);
+      for (var i = 0; i < len; i++) {
+        var el = typeof arr === 'string' ? arr.charAt(i) : arr[i];
+        if (
+          el ||
+          //ie<9 in invalid when typeof arr == string
+          i in arr
+        ) {
+          res[i] = fn.call(context || this, el, i, arr);
         }
-        return res;
-      },
-
-  startsWith(str, prefix) {
-    return str.lastIndexOf(prefix, 0) === 0;
-  },
-
-  isEmptyObject(o) {
-    for (var p in o) {
-      if (p !== undefined) {
-        return false;
       }
+      return res;
+    };
+
+export function startsWith(str, prefix) {
+  return str.lastIndexOf(prefix, 0) === 0;
+}
+
+export function isEmptyObject(o) {
+  for (var p in o) {
+    if (p !== undefined) {
+      return false;
     }
-    return true;
-  },
+  }
+  return true;
+}
 
-  endsWith(str, suffix) {
-    var ind = str.length - suffix.length;
-    return ind >= 0 && str.indexOf(suffix, ind) === ind;
-  },
+export function endsWith(str, suffix) {
+  var ind = str.length - suffix.length;
+  return ind >= 0 && str.indexOf(suffix, ind) === ind;
+}
 
-  now:
-    Date.now ||
-    function() {
-      return +new Date();
-    },
+export const now =
+  Date.now ||
+  function() {
+    return +new Date();
+  };
 
-  collectErrors(mods, errorList, cache) {
-    var i, m, mod, modStatus;
-    cache = cache || {};
-    errorList = errorList || [];
-    for (i = 0; i < mods.length; i++) {
-      mod = mods[i];
-      m = mod.id;
-      if (cache[m]) {
-        continue;
-      }
-      cache[m] = 1;
-      modStatus = mod.status;
-      if (modStatus === Status.ERROR) {
-        errorList.push(mod);
-        continue;
-      }
-      Utils.collectErrors(mod.getNormalizedRequiredModules(), errorList, cache);
+export function indexOf(item, arr) {
+  for (var i = 0, l = arr.length; i < l; i++) {
+    if (arr[i] === item) {
+      return i;
     }
-    return errorList;
-  },
+  }
+  return -1;
+}
 
-  each: each,
+export function normalizeSlash(str) {
+  return str.replace(/\\/g, '/');
+}
 
-  keys: keys,
+export function startsWithProtocol(str) {
+  return (
+    startsWith(str, 'http:') ||
+    startsWith(str, 'https:') ||
+    startsWith(str, 'file:')
+  );
+}
 
-  isArray: isArray,
-
-  indexOf(item, arr) {
-    for (var i = 0, l = arr.length; i < l; i++) {
-      if (arr[i] === item) {
-        return i;
-      }
+export function normalizePath(parentPath, subPath) {
+  var firstChar = subPath.charAt(0);
+  if (firstChar !== '.') {
+    return subPath;
+  }
+  var prefix = '';
+  if (startsWithProtocol(parentPath)) {
+    var url = parseUrl(parentPath);
+    prefix = url.protocol + '//' + url.host;
+    parentPath = url.pathname;
+  }
+  var parts = splitSlash(parentPath);
+  var subParts = splitSlash(subPath);
+  parts.pop();
+  for (var i = 0, l = subParts.length; i < l; i++) {
+    var subPart = subParts[i];
+    if (subPart === '.') {
+    } else if (subPart === '..') {
+      parts.pop();
+    } else {
+      parts.push(subPart);
     }
-    return -1;
-  },
+  }
+  return prefix + parts.join('/').replace(/\/+/, '/');
+}
 
-  normalizeSlash(str) {
-    return str.replace(/\\/g, '/');
-  },
+export function isSameOriginAs(uri1, uri2) {
+  var uriParts1 = uri1.match(uriReg);
+  var uriParts2 = uri2.match(uriReg);
+  return uriParts1[0] === uriParts2[0];
+}
 
-  startsWithProtocol(str) {
-    return (
-      Utils.startsWith(str, 'http:') ||
-      Utils.startsWith(str, 'https:') ||
-      Utils.startsWith(str, 'file:')
-    );
-  },
+// get document head
+export function docHead() {
+  return doc.getElementsByTagName('head')[0] || doc.documentElement;
+}
 
-  normalizePath(parentPath, subPath) {
-    var firstChar = subPath.charAt(0);
-    if (firstChar !== '.') {
-      return subPath;
-    }
-    var prefix = '';
-    if (Utils.startsWithProtocol(parentPath)) {
-      var url = parseUrl(parentPath);
-      prefix = url.protocol + '//' + url.host;
-      parentPath = url.pathname;
-    }
-    var parts = splitSlash(parentPath);
-    var subParts = splitSlash(subPath);
-    parts.pop();
-    for (var i = 0, l = subParts.length; i < l; i++) {
-      var subPart = subParts[i];
-      if (subPart === '.') {
-      } else if (subPart === '..') {
-        parts.pop();
-      } else {
-        parts.push(subPart);
-      }
-    }
-    return prefix + parts.join('/').replace(/\/+/, '/');
-  },
+// Returns hash code of a string djb2 algorithm
+export function getHash(str) {
+  var hash = 5381;
+  var i;
+  for (i = str.length; --i > -1; ) {
+    hash = (hash << 5) + hash + str.charCodeAt(i);
+    /* hash * 33 + char */
+  }
+  return hash + '';
+}
 
-  isSameOriginAs(uri1, uri2) {
-    var uriParts1 = uri1.match(uriReg);
-    var uriParts2 = uri2.match(uriReg);
-    return uriParts1[0] === uriParts2[0];
-  },
-
-  // get document head
-  docHead() {
-    return doc.getElementsByTagName('head')[0] || doc.documentElement;
-  },
-
-  // Returns hash code of a string djb2 algorithm
-  getHash(str) {
-    var hash = 5381;
-    var i;
-    for (i = str.length; --i > -1; ) {
-      hash = (hash << 5) + hash + str.charCodeAt(i);
-      /* hash * 33 + char */
-    }
-    return hash + '';
-  },
-
-  getRequiresFromFn(fn) {
-    var requires = [];
-    // Remove comments from the callback string,
-    // look for require calls, and pull them into the dependencies,
-    // but only if there are function args.
-    fn.toString()
-      .replace(commentRegExp, '')
-      .replace(requireRegExp, function(match, _, dep) {
-        requires.push(dep);
-      });
-    return requires;
-  },
-
-  // get a module from cache or create a module instance
-  createModule(id, cfg) {
-    id = normalizeId(id);
-    var aModule = mods[id];
-    if (!aModule) {
-      aModule = mods[id];
-    }
-    if (aModule) {
-      if (cfg) {
-        aModule.reset(cfg);
-      }
-      return aModule;
-    }
-    mods[id] = aModule = new Loader.Module(
-      mix(
-        {
-          id: id,
-        },
-        cfg,
-      ),
-    );
-
-    return aModule;
-  },
-
-  createModules(ids) {
-    return Utils.map(ids, function(id) {
-      return Utils.createModule(id);
+export function getRequiresFromFn(fn) {
+  var requires = [];
+  // Remove comments from the callback string,
+  // look for require calls, and pull them into the dependencies,
+  // but only if there are function args.
+  fn.toString()
+    .replace(commentRegExp, '')
+    .replace(requireRegExp, function(match, _, dep) {
+      requires.push(dep);
     });
-  },
-
-  initModules(modsToInit) {
-    var l = modsToInit.length;
-    var i;
-    var success = 1;
-    for (i = 0; i < l; i++) {
-      success &= modsToInit[i].initRecursive();
-    }
-    return success;
-  },
-
-  getModulesExports(mods) {
-    var l = mods.length;
-    var ret = [];
-    for (var i = 0; i < l; i++) {
-      ret.push(mods[i].getExports());
-    }
-    return ret;
-  },
-
-  addModule(id, factory, config) {
-    var aModule = mods[id];
-    if (aModule && aModule.factory !== undefined) {
-      console.warn(id + ' is defined more than once');
-      return;
-    }
-    Utils.createModule(
-      id,
-      mix(
-        {
-          id: id,
-          status: Loader.Status.LOADED,
-          factory: factory,
-        },
-        config,
-      ),
-    );
-  },
-});
+  return requires;
+}

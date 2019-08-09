@@ -1,119 +1,22 @@
-/**
- * @ignore
- * setup data structure for modulex loader
- * @author yiminghe@gmail.com
- */
+import Status from './Status';
 import mx from './modulex';
+import {
+  mix,
+  startsWith,
+  normalizeSlash,
+  normalizePath,
+  endsWith,
+  map,
+  each,
+} from './utils';
 
-var Loader = mx.Loader;
+var mods = mx.Env.mods;
 var Config = mx.Config;
-var Status = Loader.Status;
 var INITIALIZED = Status.INITIALIZED;
 var INITIALIZING = Status.INITIALIZING;
 var ERROR = Status.ERROR;
-var Utils = Loader.Utils;
-var startsWith = Utils.startsWith;
-var createModule = Utils.createModule;
-var mix = Utils.mix;
 
-function checkGlobalIfNotExist(self, property) {
-  return self[property] !== undefined ? self[property] : Config[property];
-}
-
-/**
- * @class modulex.Loader.Package
- * @private
- */
-function Package(cfg) {
-  var self = this;
-  /**
-   * name of package
-   */
-  self.name = undefined;
-  /**
-   * package base of package
-   */
-  self.base = undefined;
-  /**
-   * package entry module
-   */
-  self.main = undefined;
-  /**
-   * filter for package's modules
-   */
-  self.filter = undefined;
-  /**
-   * tag for package's modules
-   */
-  self.tag = undefined;
-  /**
-   * charset for package's modules
-   */
-  self.charset = undefined;
-  /**
-   * whether combine package's modules
-   */
-  self.combine = undefined;
-  /**
-   * combine modules in packages within the same group if combine is true
-   */
-  self.group = undefined;
-  mix(self, cfg);
-}
-
-Package.prototype = {
-  constructor: Package,
-
-  reset(cfg) {
-    mix(this, cfg);
-  },
-
-  getFilter() {
-    return checkGlobalIfNotExist(this, 'filter');
-  },
-
-  /**
-   * Tag for package.
-   * tag can not contain ".", eg: Math.random() !
-   * @return {String}
-   */
-  getTag() {
-    return checkGlobalIfNotExist(this, 'tag');
-  },
-
-  /**
-   * get package uri
-   */
-  getBase() {
-    return this.base;
-  },
-
-  /**
-   * Get charset for package.
-   * @return {String}
-   */
-  getCharset() {
-    return checkGlobalIfNotExist(this, 'charset');
-  },
-
-  /**
-   * Whether modules are combined for this package.
-   * @return {Boolean}
-   */
-  isCombine() {
-    return checkGlobalIfNotExist(this, 'combine');
-  },
-
-  /**
-   * Get package group (for combo).
-   * @returns {String}
-   */
-  getGroup() {
-    return checkGlobalIfNotExist(this, 'group');
-  },
-};
-
-Loader.Package = Package;
+const REQUIRE = 'require';
 
 function async(self, mods, callback) {
   for (var i = 0; i < mods.length; i++) {
@@ -177,7 +80,7 @@ function Module(cfg) {
   var requireFn = (self._require = function(id, callback) {
     if (typeof id === 'string') {
       var requiresModule = self.resolve(id);
-      Utils.initModules(requiresModule.getNormalizedModules());
+      initModules(requiresModule.getNormalizedModules());
       return requiresModule.getExports();
     } else {
       async(self, id, callback);
@@ -193,7 +96,7 @@ function Module(cfg) {
       prefix = url.slice(0, index + 2);
       suffix = url.slice(index + 2);
     }
-    return prefix + Utils.normalizePath(suffix, relativeUrl);
+    return prefix + normalizePath(suffix, relativeUrl);
   };
 
   requireFn.load = mx.getScript;
@@ -217,12 +120,12 @@ Module.prototype = {
     }
   },
 
-  require(id) {
+  [REQUIRE](id) {
     return this.resolve(id).getExports();
   },
 
   resolve(relativeId) {
-    return createModule(Utils.normalizePath(this.id, relativeId));
+    return createModule(normalizePath(this.id, relativeId));
   },
 
   add(loader) {
@@ -238,7 +141,7 @@ Module.prototype = {
   },
 
   flush() {
-    Utils.each(this.waits, function(loader) {
+    each(this.waits, function(loader) {
       loader.flush();
     });
     this.waits = {};
@@ -253,7 +156,7 @@ Module.prototype = {
     var v = self.type;
     if (!v) {
       var id = self.id;
-      if (Utils.endsWith(id, '.css')) {
+      if (endsWith(id, '.css')) {
         v = 'css';
       } else {
         v = 'js';
@@ -297,7 +200,7 @@ Module.prototype = {
     if (self.normalizedModules) {
       return self.normalizedModules;
     }
-    self.normalizedModules = Utils.map(self.getAlias(), function(alias) {
+    self.normalizedModules = map(self.getAlias(), function(alias) {
       return createModule(alias);
     });
     return self.normalizedModules;
@@ -311,7 +214,7 @@ Module.prototype = {
     var self = this;
     // es6: this.module.url
     if (!self.uri) {
-      self.uri = Utils.normalizeSlash(mx.Config.resolveModFn(self));
+      self.uri = normalizeSlash(mx.Config.resolveModFn(self));
     }
     return self.uri;
   },
@@ -340,7 +243,7 @@ Module.prototype = {
       var p;
       for (p in packages) {
         var pWithSlash = p;
-        if (!Utils.endsWith(pWithSlash, '/')) {
+        if (!endsWith(pWithSlash, '/')) {
           pWithSlash += '/';
         }
         if (startsWith(modIdSlash, pWithSlash) && p.length > pName.length) {
@@ -386,14 +289,14 @@ Module.prototype = {
 
   setRequiresModules(requires) {
     var self = this;
-    var requiredModules = (self.requiredModules = Utils.map(
+    var requiredModules = (self.requiredModules = map(
       normalizeRequires(requires, self),
       function(m) {
         return createModule(m);
       },
     ));
     var normalizedRequiredModules = [];
-    Utils.each(requiredModules, function(mod) {
+    each(requiredModules, function(mod) {
       normalizedRequiredModules.push.apply(
         normalizedRequiredModules,
         mod.getNormalizedModules(),
@@ -424,7 +327,7 @@ Module.prototype = {
     var self = this;
     var args;
     if (self.amd) {
-      args = Utils.map(self.getRequiredModules(), function(m) {
+      args = map(self.getRequiredModules(), function(m) {
         return m.getExports();
       });
       if (self.exportsIndex !== undefined && self.exportsIndex !== -1) {
@@ -433,7 +336,7 @@ Module.prototype = {
     } else {
       args = self.cjs
         ? [self._require, self.exports, self]
-        : Utils.map(self.getRequiredModules(), function(m) {
+        : map(self.getRequiredModules(), function(m) {
             return m.getExports();
           });
     }
@@ -456,7 +359,7 @@ Module.prototype = {
           self.status = ERROR;
           if (self.onError || Config.onModuleError) {
             var error = {
-              type: 'init',
+              type: 'index.js',
               exception: e,
               module: self,
             };
@@ -475,7 +378,7 @@ Module.prototype = {
           return 0;
         }
         var success = 1;
-        Utils.each(self.getNormalizedRequiredModules(), function(m) {
+        each(self.getNormalizedRequiredModules(), function(m) {
           if (m.status === ERROR) {
             success = 0;
             return false;
@@ -518,7 +421,7 @@ Module.prototype = {
       // commonjs format will call require in module code again
       success = self.initSelf();
     } else {
-      Utils.each(self.getNormalizedRequiredModules(), function(m) {
+      each(self.getNormalizedRequiredModules(), function(m) {
         success = success && m.initRecursive();
       });
       if (success) {
@@ -580,7 +483,7 @@ function getShallowAlias(mod) {
       if (main.charAt(0) !== '.') {
         main = './' + main;
       }
-      alias = [Utils.normalizePath(id, main)];
+      alias = [normalizePath(id, main)];
     } else if (packageInfo.alias) {
       alias = packageInfo.alias(id);
     }
@@ -589,8 +492,114 @@ function getShallowAlias(mod) {
   return alias;
 }
 
-Loader.Module = Module;
-/**
- * refer:
- * - es6 module: http://www.2ality.com/2014/09/es6-modules-final.html
- */
+// get a module from cache or create a module instance
+export function createModule(id, cfg) {
+  id = normalizeId(id);
+  var aModule = mods[id];
+  if (!aModule) {
+    aModule = mods[id];
+  }
+  if (aModule) {
+    if (cfg) {
+      aModule.reset(cfg);
+    }
+    return aModule;
+  }
+  mods[id] = aModule = new Module(
+    mix(
+      {
+        id: id,
+      },
+      cfg,
+    ),
+  );
+
+  return aModule;
+}
+
+export function createModules(ids) {
+  return map(ids, function(id) {
+    return createModule(id);
+  });
+}
+
+export function initModules(modsToInit) {
+  var l = modsToInit.length;
+  var i;
+  var success = 1;
+  for (i = 0; i < l; i++) {
+    success &= modsToInit[i].initRecursive();
+  }
+  return success;
+}
+
+export function getModulesExports(mods) {
+  var l = mods.length;
+  var ret = [];
+  for (var i = 0; i < l; i++) {
+    ret.push(mods[i].getExports());
+  }
+  return ret;
+}
+
+export function addModule(id, factory, config) {
+  var aModule = mods[id];
+  if (aModule && aModule.factory !== undefined) {
+    console.warn(id + ' is defined more than once');
+    return;
+  }
+  createModule(
+    id,
+    mix(
+      {
+        id: id,
+        status: Status.LOADED,
+        factory: factory,
+      },
+      config,
+    ),
+  );
+}
+
+function normalizeId(id) {
+  if (id.charAt(0) === '/') {
+    id = location.protocol + '//' + location.host + id;
+  }
+  // 'x/' 'x/y/z/'
+  if (id.charAt(id.length - 1) === '/') {
+    id += 'index';
+  }
+  // x.js === x
+  if (endsWith(id, '.js')) {
+    id = id.slice(0, -3);
+  }
+  return id;
+}
+
+export function collectModuleErrors(mods, errorList, cache) {
+  var i, m, mod, modStatus;
+  cache = cache || {};
+  errorList = errorList || [];
+  for (i = 0; i < mods.length; i++) {
+    mod = mods[i];
+    m = mod.id;
+    if (cache[m]) {
+      continue;
+    }
+    cache[m] = 1;
+    modStatus = mod.status;
+    if (modStatus === Status.ERROR) {
+      errorList.push(mod);
+      continue;
+    }
+    collectModuleErrors(mod.getNormalizedRequiredModules(), errorList, cache);
+  }
+  return errorList;
+}
+
+mix(Module, {
+  createModule,
+  createModules,
+});
+
+export default Module;

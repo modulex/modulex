@@ -1,4 +1,4 @@
-define(function (require) {
-    require('./a-b');
-    require('./a-d');
+define(function(require) {
+  require('./a-b');
+  require('./a-d');
 });

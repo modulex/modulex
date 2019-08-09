@@ -16,7 +16,7 @@
     var each = Utils.each;
     var ComboLoader = mx.Loader.ComboLoader;
     var loader = new ComboLoader();
-    var mods = Utils.createModules(modIds);
+    var mods = mx.Module.createModules(modIds);
     var unloadedMods = [];
     each(mods, function(mod) {
       unloadedMods.push.apply(unloadedMods, mod.getNormalizedModules());

@@ -16,4 +16,5 @@ Thumbs.db
 .svn/
 *.swp
 node_modules/
-/pkg/
+/build/
+yarn.lock

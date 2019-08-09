@@ -1,3 +1,3 @@
-define(function () {
-    throw new Error('a-b-c');
+define(function() {
+  throw new Error('a-b-c');
 });
