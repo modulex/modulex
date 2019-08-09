@@ -1,6 +1,6 @@
 {
   "name": "modulex",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "description": "A module registration and load library",
   "author": "yiminghe <yiminghe@gmail.com>",
   "devDependencies": {
