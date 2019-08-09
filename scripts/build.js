@@ -1,18 +1,28 @@
 const fs = require('fs');
 const path = require('path');
-const spawn = require('cross-spawn');
+const { spawnSync } = require('child_process');
 
 const commands = [
   ['rm', ['-rf', 'build']],
   ['rollup', ['-c']],
-  ['MINIFY=true rollup', ['-c']],
-  ['cp', ['src/import-style.js', 'build/']],
+  [
+    'rollup',
+    ['-c'],
+    {
+      env: { ...process.env, MINIFY: 'true' },
+    },
+  ],
+  //['cp', ['src/import-style.js', 'build/']],
 ];
 
 commands.every(c => {
+  const options = { stdio: 'inherit', ...c[2] };
   console.log(c[0], ...c[1]);
-  const ret = spawn.sync(c[0], c[1], { stdio: 'inherit' });
-  return c[2] || !ret.status;
+  const ret = spawnSync(c[0], c[1], options);
+  if (ret.error) {
+    console.error(ret.error);
+  }
+  return !ret.status;
 });
 
 fs.writeFileSync(
