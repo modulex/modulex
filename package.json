@@ -36,7 +36,7 @@
   "scripts": {
     "lint-staged": "lint-staged",
     "prettier": "prettier --write \"{src,tests}/**/*.{js,tsx}\"",
-    "pub": "npm run build && np --no-publish --no-release-draft",
+    "pub": "npm run build && np --yolo --no-release-draft",
     "build": "rm -rf build && rollup -c && MINIFY=true rollup -c && cp src/import-style.js build/",
     "start": "node server",
     "saucelabs": "gulp saucelabs",
